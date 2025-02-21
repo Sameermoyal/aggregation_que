@@ -1,0 +1,97 @@
+
+Calculate the total revenue (sum of price * quantity) for all sales.
+
+db.rawData.aggregate([
+    {
+        $group:{
+            _id:null , total :{
+                $sum :{
+                    $multiply:["$price","$quantity"]
+                }
+            }
+        }
+    }
+    ])
+    
+    
+    Group sales by category and calculate the total revenue for each category.
+    
+    db.rawData.aggregate([
+       { $group:{
+            _id:"$category" ,revenueBYCategory :{
+                $sum:{
+                  $multiply:["$price","$quantity"]
+                }
+            }
+        }}
+        ])
+        
+        
+        
+        
+        Find the top-selling product (product with the highest total quantity sold).
+        db.rawData.aggregate([
+            
+            {
+             $group :{_id: "$product"  ,total :{$sum:"$quantity" } }
+            },
+        
+            
+            
+             {$sort :{total:-1}},
+             {$limit :1}
+            ])
+        
+        
+        
+        Get the average price of products in each category.
+        
+        db.rawData.aggregate([
+            {
+                $group :{_id :"$category" ,avgPrice: {$avg : "$price" } }
+            }
+            ])
+        
+        
+        
+        Filter only sales where the total revenue (price * quantity) is greater than 50.
+        
+        db.rawData.aggregate(
+            [
+                {
+                    $project :{
+                        quantity :1,
+                        price :1,
+                        product:1,
+                        revenue:{
+                            $multiply:["$quantity","$price"]
+                        }
+                    }
+                },
+                
+                {
+                    $match :{
+                        revenue :{$gte:50}
+                    }
+                }
+                ])
+        
+        
+        Count the number of sales in each category.
+        
+       db.rawData.aggregate([
+  {
+    $group: {
+      _id: "$category",      // Group by the category field
+      salesCount: { $sum: 1 } // Increment the count by 1 for each document
+    }
+  }
+]);
+
+        
+        
+        
+        
+        
+        
+        
