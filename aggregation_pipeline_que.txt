@@ -91,6 +91,17 @@ db.rawData.aggregate([
         
         
         
+
+find total quantity of each product
+
+db.rawData.aggregate([
+  {
+    $group: {
+      _id: "$product",          // Group by the product field
+      totalQuantity: { $sum: "$quantity" } // Sum the quantity for each product
+    }
+  }
+]);
         
         
         
