@@ -106,3 +106,201 @@ db.rawData.aggregate([
         
         
         
+
+
+
+Choose the approach that fits your needs:
+
+$count is straightforward when you just need an overall document count (or count after a filter).
+$group with $sum: 1 is useful when you need counts per group (e.g., per category or per product).
+
+
+
+
+
+
+db.rawData.aggregate([
+    {
+        $group : {
+            _id:"$category", countNumber :{
+                $sum: 1
+            }
+        }
+    }
+    ])
+    
+    
+    
+    Find the total quantity sold for each product.
+    
+    db.rawData.aggregate([
+        {
+            $group:{
+                _id:"$product", totlaQuntity :{
+                    $sum :"$quantity"
+                }
+            }
+        }])
+        
+        
+        
+        
+        
+   Get the most expensive product in each category.
+   
+   db.rawData.aggregate([
+       
+        {
+             $sort:{
+                 category:1,
+                 price :-1
+             }
+         }
+      ,{
+          $group :{
+              _id :"$category",
+              expensivePro:{
+                  $first:"$product"
+              },
+              maxPrice:{
+                  $first:"$price"
+              }
+          }
+      }
+        
+        
+       ])
+        
+        
+       
+    
+    
+    Find the total revenue for sales made after "2024-02-16".
+    
+    
+    db.rawData.aggregate([
+         {
+    $addFields: {
+      dateConverted: { $dateFromString: { dateString: "$date" } }
+    }
+  },
+        {
+            $match : {
+                 dateConverted: {
+                    $gte : ISODate("2024-02-16T00:00:00Z")
+                }
+            }
+        }])
+        
+        
+        Calculate the total revenue and average price for each category.
+        
+        db.rawData.aggregate([
+            {
+                $group : {
+                    _id:"$category", 
+                    totalRevn :{
+                        $sum : {
+                            $multiply :["$price","$quantity"]
+                        },
+                    },
+                    avgPrice:{
+                        $avg:"$price"
+                    }
+                }
+            }])
+        
+        
+        
+        
+        
+        
+        Find the product that has the lowest revenue.
+        
+        
+        db.rawData.aggregate([
+            {
+                $group:{
+                _id:"$product",
+                revenue:{
+                    $sum :{
+                        $multiply:["$price","$quantity"]
+                    }
+                }
+            }
+            },
+            
+            {
+                $sort :{
+                    revenue:-1
+                }
+            },
+            
+            {
+                $limit:1, 
+            }
+            
+            
+            ])
+        
+        
+        
+        Find the total revenue and total quantity sold for each day.
+        
+        db.rawData.aggregate([
+            {
+                $group :{
+                    _id:"$date",
+                    totalRevenue :{
+                        $sum :{
+                            $multiply: ["$price","$quantity"]
+                        }
+                    },
+                    totlaQuantity:{
+                        $sum:"$quantity"
+                    }
+                }
+            },
+            
+            {
+                $sort :{
+                    _id:1
+                }
+            }
+            ])
+        
+        
+        
+        
+        
+        Retrieve only the top 3 highest revenue-generating products.
+        
+        
+        db.rawData.aggregate([
+            {
+                $group: {
+                    _id :"$product",
+                    totalRev :{
+                        $sum:{
+                            $multiply:["$price","$quantity"]
+                        }
+                    }
+                }
+                
+            },
+            {
+                $sort:{
+                    totalRev:-1
+                }
+            },
+            
+            {
+                $limit:3
+            }
+            
+            ])
+        
+        
+    
+        
+        
