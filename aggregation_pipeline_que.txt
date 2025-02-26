@@ -300,6 +300,16 @@ db.rawData.aggregate([
             
             ])
         
+
+
+
+db.sales.aggregate([
+     {
+         "$group":{"_id" :"$category", "totalSells":{
+            "$sum":"$quantity"
+         }}
+     }
+    ])
         
     
         
