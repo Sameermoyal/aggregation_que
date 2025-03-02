@@ -313,4 +313,277 @@ db.sales.aggregate([
         
     
         
+
+
+Sample Data: orders Collection
+Insert the following data into your orders collection:
+
+json
+Copy
+Edit
+db.orders.insertMany([
+  { _id: 1, customer: "Alice", total: 120, status: "Completed", items: [{ product: "Shirt", quantity: 2 }, { product: "Jeans", quantity: 1 }] },
+  { _id: 2, customer: "Bob", total: 90, status: "Pending", items: [{ product: "Shoes", quantity: 1 }, { product: "Hat", quantity: 2 }] },
+  { _id: 3, customer: "Charlie", total: 200, status: "Completed", items: [{ product: "Jacket", quantity: 1 }, { product: "Jeans", quantity: 2 }] },
+  { _id: 4, customer: "Alice", total: 150, status: "Completed", items: [{ product: "T-shirt", quantity: 3 }] },
+  { _id: 5, customer: "Bob", total: 50, status: "Pending", items: [{ product: "Gloves", quantity: 2 }] }
+]);
+Exercises using Different Stages
+1. $match - Filter Completed Orders
+Retrieve only orders where status is "Completed".
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $match: { status: "Completed" } }
+]);
+2. $project - Show Only Customer and Total
+Return only the customer and total fields, hiding _id.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $project: { _id: 0, customer: 1, total: 1 } }
+]);
+3. $group - Total Spending per Customer
+Calculate total spending per customer.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $group: { _id: "$customer", totalSpent: { $sum: "$total" } } }
+]);
+4. $sort - Sort by Total in Descending Order
+Sort the orders by total in descending order.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $sort: { total: -1 } }
+]);
+5. $limit - Get Top 3 Highest Orders
+Retrieve the top 3 highest total orders.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $sort: { total: -1 } },
+  { $limit: 3 }
+]);
+6. $skip - Skip the First 2 Orders
+Skip the first 2 documents and return the rest.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $skip: 2 }
+]);
+7. $unwind - Expand Items Array
+Unwind the items array to create separate documents for each item.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $unwind: "$items" }
+]);
+8. $lookup - Join with Another Collection (customers)
+Assume another collection customers exists:
+
+json
+Copy
+Edit
+db.customers.insertMany([
+  { name: "Alice", age: 30, city: "New York" },
+  { name: "Bob", age: 25, city: "Los Angeles" },
+  { name: "Charlie", age: 35, city: "Chicago" }
+]);
+Now, join orders with customers to get customer details.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  {
+    $lookup: {
+      from: "customers",
+      localField: "customer",
+      foreignField: "name",
+      as: "customerDetails"
+    }
+  }
+]);
+9. $addFields - Add a New Field for Discount
+Add a new field discountedTotal where total is reduced by 10%.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $addFields: { discountedTotal: { $multiply: ["$total", 0.9] } } }
+]);
+10. $count - Count Total Orders
+Count the total number of orders.
+
+json
+Copy
+Edit
+db.orders.aggregate([
+  { $count: "totalOrders" }
+]);
+11. $facet - Multiple Aggregations
+Get both total spending per customer and total count of completed orders.
+
+
+db.orders.aggregate([
+  {
+    $facet: {
+      totalSpending: [
+        { $group: { _id: "$customer", totalSpent: { $sum: "$total" } } }
+      ],
+      completedOrdersCount: [
+        { $match: { status: "Completed" } },
+        { $count: "completedOrders" }
+      ]
+    }
+  }
+]);db.orders.aggregate([
+    {
+        $match:{
+            status:"Pending"
+        }
+    }
+    ])
+    
+    
+ db.orders.aggregate([
+     {
+         $project :{
+             customer:1,total:1,_id:0
+         }
+     }
+     ])
+     
+     
+db.orders.aggregate([
+    
+    {
+        $group :{
+            _id:"$customer" ,totalSpending :{
+                $sum : "$total"
+            }
+        }
+    },
+    
+    {
+        $sort : {totalSpending:1
+            
+        }
+    }
+    ])     
+    
+    
+db.orders.aggregate([
+    {
+        $sort :{
+            total:-1
+        }
+    }
+    ])   
+    
+    
+db.orders.aggregate([
+    {
+      $sort :{
+          total :-1
+      }  
+    },
+    
+    {
+        $limit:3
+    }
+    ])    
+    
+    
+    
+    db.orders.aggregate([
+        {
+            $skip :1
+        }
+        ])
         
+        
+        
+        db.orders.aggregate([
+            {
+                $unwind : "$items"
+            }
+            ])
+        
+        
+        
+        
+        db.customers.aggregate([
+            {
+                $lookup :{
+                    from : "orders",
+                    localField:"name",
+                    foreignField:"customer",
+                    as:"fuul_detail"
+                }
+            }
+            ])
+            
+            
+            db.orders.aggregate([
+                {
+                    $lookup :{
+                        from :"customers",
+                        localField:"customer",
+                        foreignField:"name",
+                        as:"full_details"
+                    }
+                },
+                {
+                  $sort :{
+                      total :-1
+                  }  
+                },
+                {
+                    $limit :1
+                }
+            ])
+            
+            
+            
+            
+            
+            db.orders.aggregate([
+                {
+                    $addFields: {discount : {
+                        $multiply:["$total" ,.9]
+                    } }
+                }
+                ])
+        
+        
+        
+        db.orders.aggregate([
+            {
+                $count : "totalCount"
+            }
+            ])
+
+        
+
+
+
+
+
+
